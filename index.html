@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Health-Twin — AI Health Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f; --bg2:#0c0f1c; --bg3:#111525;
+  --card:#13172a; --card2:#181d32; --card3:#1d2238;
+  --border:rgba(255,255,255,.06); --border2:rgba(255,255,255,.1); --border3:rgba(255,255,255,.16);
+  --text:#dde5ff; --text2:#7585b0; --text3:#3b4570;
+  --accent:#5b8df6; --accent2:#7b6cf6; --accent-glow:rgba(91,141,246,.2);
+  --green:#10d98a; --green-d:rgba(16,217,138,.15);
+  --red:#f55a51;   --red-d:rgba(245,90,81,.15);
+  --amber:#f7b731; --amber-d:rgba(247,183,49,.15);
+  --teal:#1cd6c4;  --teal-d:rgba(28,214,196,.15);
+  --pink:#e879a8;  --pink-d:rgba(232,121,168,.15);
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  --r:12px; --r-sm:8px; --r-lg:18px; --r-xl:24px;
+  --shadow:0 8px 32px rgba(0,0,0,.6);
+  --glow-accent:0 0 40px rgba(91,141,246,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;overflow:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ══════════════════════════════════════
+   LANDING / ROLE SELECTION
+══════════════════════════════════════ */
+#landing{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 120% 90% at 50% -10%,#0b1238 0%,#07090f 60%)}
+.landing-inner{width:100%;max-width:880px;padding:20px;text-align:center}
+.vitacore-logo{margin-bottom:48px}
+.logo-icon{width:72px;height:72px;border-radius:22px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+  margin:0 auto 16px;box-shadow:0 0 60px rgba(91,141,246,.4),var(--shadow)}
+.logo-icon svg{width:40px;height:40px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:38px;font-weight:800;letter-spacing:-1.5px;
+  background:linear-gradient(135deg,#fff 30%,#7585b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-tag{font-size:12px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;font-weight:500}
+.landing-q{font-size:13px;color:var(--text2);margin-bottom:30px;font-weight:500;letter-spacing:.02em}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:560px;margin:0 auto 32px}
+.role-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--r-xl);
+  padding:32px 28px;cursor:pointer;transition:.25s;position:relative;overflow:hidden;text-align:left}
+.role-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.25s;border-radius:inherit}
+.role-card.patient::before{background:radial-gradient(ellipse at top left,rgba(91,141,246,.12),transparent 60%)}
+.role-card.doctor::before{background:radial-gradient(ellipse at top left,rgba(16,217,138,.1),transparent 60%)}
+.role-card:hover{border-color:var(--border3);transform:translateY(-3px);box-shadow:var(--shadow)}
+.role-card:hover::before{opacity:1}
+.role-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.role-card.patient .role-card-icon{background:var(--accent-glow);border:1px solid rgba(91,141,246,.25)}
+.role-card.doctor .role-card-icon{background:var(--green-d);border:1px solid rgba(16,217,138,.25)}
+.role-card h3{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
+.role-card p{font-size:12px;color:var(--text2);line-height:1.5}
+.role-card .role-arrow{position:absolute;top:20px;right:20px;width:28px;height:28px;border-radius:8px;
+  background:var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;opacity:.4;transition:.2s}
+.role-card:hover .role-arrow{opacity:1;background:var(--border2)}
+.landing-langs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lang-btn{padding:7px 18px;border-radius:100px;font-size:11.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border2);background:transparent;color:var(--text2);transition:.15s;font-family:var(--font)}
+.lang-btn:hover,.lang-btn.active{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
+
+/* ══════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════ */
+#auth-modal{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;
+  background:rgba(7,9,15,.85);backdrop-filter:blur(8px)}
+.auth-box{width:100%;max-width:440px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:32px;box-shadow:var(--shadow);margin:20px}
+.auth-back{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;
+  margin-bottom:20px;transition:.15s;background:none;border:none;font-family:var(--font)}
+.auth-back:hover{color:var(--text)}
+.auth-header{margin-bottom:24px}
+.auth-header h2{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.auth-header p{font-size:12px;color:var(--text2);margin-top:4px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg2);
+  border-radius:var(--r-sm);padding:3px;margin-bottom:22px}
+.auth-tab{padding:8px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;
+  border:none;background:transparent;color:var(--text3);transition:.2s;font-family:var(--font)}
+.auth-tab.active{background:var(--card3);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:10px 13px;font-size:13px;color:var(--text);
+  font-family:var(--font);outline:none;transition:.15s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,246,.12)}
+.field select option{background:var(--card2)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.auth-err{background:var(--red-d);border:1px solid rgba(245,90,81,.3);border-radius:var(--r-sm);
+  padding:9px 13px;font-size:12px;color:#fca5a5;margin-bottom:12px;display:none}
+.btn-submit{width:100%;padding:13px;border-radius:var(--r-sm);border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:.2s;margin-top:4px;letter-spacing:.01em}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,141,246,.4)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.auth-switch{text-align:center;margin-top:14px;font-size:12px;color:var(--text3)}
+.auth-switch span{color:var(--accent);cursor:pointer;font-weight:600}
+
+/* ══════════════════════════════════════
+   MAIN SHELL
+══════════════════════════════════════ */
+#shell{display:none;grid-template-columns:220px 1fr;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden}
+.sb-top{padding:18px 14px 12px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sb-brand-icon{width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sb-brand-name{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);
+  border-radius:var(--r-sm);border:1px solid var(--border)}
+.sb-avatar{width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sb-uinfo{flex:1;min-width:0}
+.sb-uname{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.sb-nav{flex:1;overflow-y:auto;padding:10px 8px}
+.sb-section{padding:0 8px;margin:12px 0 4px;font-size:8.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;
+  cursor:pointer;font-size:12px;color:var(--text2);transition:.15s;
+  border:none;background:transparent;width:100%;text-align:left;margin-bottom:2px;font-family:var(--font);font-weight:500}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-item.active{background:rgba(91,141,246,.14);color:var(--accent);font-weight:600}
+.nav-item .ni-icon{width:16px;height:16px;font-size:14px;text-align:center;flex-shrink:0}
+.sb-bottom{padding:12px 14px;border-top:1px solid var(--border)}
+.sb-vitals{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.sv-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+.sv-val{font-size:15px;font-weight:700;font-family:var(--mono);line-height:1}
+.sv-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.sb-lang-wrap{margin-top:6px}
+.sb-lang-wrap select{width:100%;background:var(--card);border:1px solid var(--border);
+  border-radius:7px;padding:6px 10px;font-size:11px;color:var(--text2);
+  font-family:var(--font);outline:none;cursor:pointer}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;background:var(--bg);padding:24px;display:flex;flex-direction:column;gap:20px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.page-sub{font-size:12px;color:var(--text2);margin-top:3px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:14px}
+.card-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+
+/* ── METRIC CARDS ── */
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px;position:relative;overflow:hidden}
+.metric-accent{position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.metric-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;font-size:15px;margin-bottom:10px}
+.metric-val{font-size:28px;font-weight:800;letter-spacing:-1px;font-family:var(--mono);line-height:1}
+.metric-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-top:4px}
+.metric-sub{font-size:11px;color:var(--text2);margin-top:6px}
+.metric-bar{height:2px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+
+/* ── FORM FIELDS ── */
+.form-field{margin-bottom:14px}
+.form-label{display:block;font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.form-input,.form-select{width:100%;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:10px 13px;font-size:13px;color:var(--text);
+  font-family:var(--font);outline:none;transition:.15s;-webkit-appearance:none}
+.form-input:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,246,.1)}
+.form-select option{background:var(--card2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── SYMPTOM CHIPS ── */
+.symptom-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.sym-chip{padding:6px 13px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border2);background:var(--bg2);color:var(--text2);transition:.15s}
+.sym-chip:hover{border-color:var(--accent);color:var(--accent)}
+.sym-chip.sel{border-color:var(--accent);background:rgba(91,141,246,.15);color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r-sm);
+  border:none;font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;font-family:var(--font)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,141,246,.35)}
+.btn-ghost{background:var(--card3);color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--border);color:var(--text)}
+.btn-danger{background:var(--red-d);color:var(--red);border:1px solid rgba(245,90,81,.25)}
+.btn-danger:hover{background:rgba(245,90,81,.2)}
+.btn-green{background:var(--green-d);color:var(--green);border:1px solid rgba(16,217,138,.25)}
+.btn-green:hover{background:rgba(16,217,138,.2)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-lg{padding:13px 24px;font-size:14px;width:100%;justify-content:center}
+
+/* ── RISK INDICATOR ── */
+.risk-ring{position:relative;width:130px;height:130px;margin:0 auto 12px;flex-shrink:0}
+.risk-ring svg{transform:rotate(-90deg)}
+.risk-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.risk-score-num{font-size:30px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;line-height:1}
+.risk-score-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.risk-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:100px;
+  font-size:12px;font-weight:700;letter-spacing:.02em}
+.risk-low{background:var(--green-d);color:var(--green);border:1px solid rgba(16,217,138,.3)}
+.risk-medium{background:var(--amber-d);color:var(--amber);border:1px solid rgba(247,183,49,.3)}
+.risk-high{background:var(--red-d);color:var(--red);border:1px solid rgba(245,90,81,.3)}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;height:180px}
+
+/* ── HR DISPLAY ── */
+.hr-display{display:flex;align-items:center;gap:16px;padding:16px;
+  background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--border)}
+.hr-pulse{width:40px;height:40px;border-radius:50%;background:var(--red-d);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  animation:pulse-ring 1.4s ease infinite;flex-shrink:0}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(245,90,81,.4)}70%{box-shadow:0 0 0 14px rgba(245,90,81,0)}100%{box-shadow:0 0 0 0 rgba(245,90,81,0)}}
+.hr-num{font-size:38px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1}
+.hr-unit{font-size:12px;color:var(--text3);margin-top:4px}
+.hr-status{font-size:10px;color:var(--text2)}
+
+/* ── RECS ── */
+.rec-item{display:flex;align-items:flex-start;gap:10px;padding:10px;
+  background:var(--bg2);border-radius:var(--r-sm);border-left:3px solid var(--accent);margin-bottom:7px}
+.rec-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.rec-text{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ── DOCTOR CARD ── */
+.doc-card{display:flex;align-items:center;gap:13px;padding:13px;
+  background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--border);
+  transition:.15s;margin-bottom:8px}
+.doc-card:hover{border-color:var(--border2)}
+.doc-avatar{width:40px;height:40px;border-radius:11px;background:var(--green-d);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-spec{font-size:10.5px;color:var(--text2);margin-top:1px}
+.doc-hosp{font-size:10px;color:var(--text3);margin-top:1px}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── HISTORY ── */
+.hist-item{display:flex;align-items:center;gap:12px;padding:11px 13px;
+  background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:.15s}
+.hist-item:hover{border-color:var(--border2)}
+.hist-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.hist-info{flex:1}
+.hist-date{font-size:10px;color:var(--text3)}
+.hist-score{font-size:22px;font-weight:800;font-family:var(--mono);letter-spacing:-1px}
+
+/* ── SENSOR STATUS ── */
+.sensor-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:5px}
+.sensor-dot.live{background:var(--green);animation:blink 1.2s ease infinite}
+.sensor-dot.error{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--card3);border:1px solid var(--border2);border-radius:var(--r);
+  padding:11px 20px;font-size:13px;font-weight:600;z-index:9999;
+  box-shadow:var(--shadow);opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── LOADING SPINNER ── */
+.spin{width:20px;height:20px;border:2px solid rgba(255,255,255,.15);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── DOCTOR DASHBOARD ── */
+.doc-reg-form{background:var(--card2);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px}
+.doc-reg-form h3{font-size:16px;font-weight:800;margin-bottom:18px;letter-spacing:-.3px}
+.registered-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;
+  border-radius:100px;background:var(--green-d);color:var(--green);font-size:11px;font-weight:700;
+  border:1px solid rgba(16,217,138,.3);margin-bottom:16px}
+
+/* ── ALERT BANNER ── */
+.alert-banner{display:flex;align-items:center;gap:12px;padding:13px 18px;
+  border-radius:var(--r-sm);margin-bottom:14px}
+.alert-high{background:var(--red-d);border:1px solid rgba(245,90,81,.3);color:var(--red)}
+.alert-sms{background:var(--green-d);border:1px solid rgba(16,217,138,.3);color:var(--green)}
+
+/* ── PAGE ANIMATION ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .3s ease}
+
+/* ── GRID LINE BG ── */
+#landing::after{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(91,141,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,141,246,.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:-1}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="landing">
+  <div class="landing-inner anim">
+    <div class="vitacore-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="logo-name" id="l-appName">Health<span style="-webkit-text-fill-color:var(--teal);background:linear-gradient(135deg,var(--teal),var(--accent));-webkit-background-clip:text">-Twin</span></div>
+      <div class="logo-tag" id="l-tagline">AI Health Intelligence</div>
+    </div>
+    <div class="landing-q" id="l-selectRole">Who are you today?</div>
+    <div class="role-cards">
+      <div class="role-card patient" onclick="chooseRole('patient')">
+        <div class="role-card-icon">🧑‍⚕️</div>
+        <h3 id="l-patient">Patient</h3>
+        <p id="l-patientDesc">Monitor your health & get AI-powered insights</p>
+        <div class="role-arrow">→</div>
+      </div>
+      <div class="role-card doctor" onclick="chooseRole('doctor')">
+        <div class="role-card-icon">👨‍⚕️</div>
+        <h3 id="l-doctor">Doctor</h3>
+        <p id="l-doctorDesc">Manage your profile & receive patient alerts</p>
+        <div class="role-arrow">→</div>
+      </div>
+    </div>
+    <div class="landing-langs">
+      <button class="lang-btn active" onclick="setLang('en',this)">🇬🇧 English</button>
+      <button class="lang-btn" onclick="setLang('te',this)">🇮🇳 తెలుగు</button>
+      <button class="lang-btn" onclick="setLang('kn',this)">🇮🇳 ಕನ್ನಡ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH MODAL ══ -->
+<div id="auth-modal" style="display:flex">
+  <div class="auth-box anim" id="auth-box" style="display:none">
+    <button class="auth-back" onclick="showLanding()">← Back</button>
+    <div class="auth-header">
+      <h2 id="auth-title">Sign In</h2>
+      <p id="auth-subtitle">Welcome back to Health-Twin</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="login">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register">Create Account</button>
+    </div>
+    <div id="auth-err" class="auth-err"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="field">
+        <label data-i18n="username">Username</label>
+        <input type="text" id="login-user" class="form-input" placeholder="your_username" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label data-i18n="password">Password</label>
+        <input type="password" id="login-pass" class="form-input" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="form-register" style="display:none">
+      <div class="field">
+        <label data-i18n="fullName">Full Name</label>
+        <input type="text" id="reg-name" class="form-input" placeholder="Dr. / Mr. / Ms. ..."/>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label data-i18n="username">Username</label>
+          <input type="text" id="reg-user" class="form-input" placeholder="username"/>
+        </div>
+        <div class="field">
+          <label data-i18n="password">Password</label>
+          <input type="password" id="reg-pass" class="form-input" placeholder="min 6 chars"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label data-i18n="age">Age</label>
+          <input type="number" id="reg-age" class="form-input" value="30" min="1" max="120"/>
+        </div>
+        <div class="field">
+          <label data-i18n="gender">Gender</label>
+          <select id="reg-gender" class="form-input">
+            <option value="Male" data-i18n="male">Male</option>
+            <option value="Female" data-i18n="female">Female</option>
+            <option value="Other" data-i18n="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="phone">Phone Number</label>
+        <input type="tel" id="reg-phone" class="form-input" placeholder="+91 9876543210"/>
+      </div>
+      <!-- Doctor-specific fields -->
+      <div id="doc-extra-fields" style="display:none">
+        <div class="field">
+          <label data-i18n="hospital">Hospital</label>
+          <input type="text" id="reg-hospital" class="form-input" placeholder="Hospital name"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label data-i18n="specialization">Specialization</label>
+            <select id="reg-spec" class="form-input">
+              <option>Cardiology</option><option>Neurology</option><option>Pulmonology</option>
+              <option>General Medicine</option><option>Orthopedics</option><option>Dermatology</option>
+              <option>Psychiatry</option><option>Pediatrics</option><option>Gynecology</option>
+            </select>
+          </div>
+          <div class="field">
+            <label data-i18n="experience">Exp. Years</label>
+            <input type="number" id="reg-exp" class="form-input" value="5" min="0" max="60"/>
+          </div>
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-register" onclick="doRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN SHELL ══ -->
+<div id="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-brand-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="sb-brand-name">Health<span style="color:var(--teal)">-Twin</span></div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-avatar">👤</div>
+        <div class="sb-uinfo">
+          <div class="sb-uname" id="sb-uname">—</div>
+          <div class="sb-urole" id="sb-urole">—</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-bottom">
+      <div class="sb-vitals" id="sb-vitals-mini">
+        <div class="sv-pill"><div class="sv-val" id="sb-hr">—</div><div class="sv-lbl">BPM</div></div>
+        <div class="sv-pill"><div class="sv-val" id="sb-score">—</div><div class="sv-lbl">Score</div></div>
+      </div>
+      <div class="sb-lang-wrap">
+        <select onchange="changeLang(this.value)" id="sb-lang-sel">
+          <option value="en">🇬🇧 English</option>
+          <option value="te">🇮🇳 తెలుగు</option>
+          <option value="kn">🇮🇳 ಕನ್ನಡ</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main-content"></main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+<canvas id="hr-chart"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+// ══════════════════════════════════════════════════
+// STATE & i18n
+// ══════════════════════════════════════════════════
+const API = 'http://localhost:5000';
+let TRANSLATIONS = {};
+
+const state = {
+  lang: 'en', role: null, token: null,
+  patient_id: null, full_name: null,
+  profile: {}, lastResult: null,
+  heartRate: 72, hrHistory: [],
+  sensorInterval: null,
+  analysisHistory: [],
+  registeredDoctors: [
+    {doctor_id:'D1',name:'Dr. Priya Sharma',hospital:'Apollo Hospitals',specialization:'Cardiology',phone:'+918042124444',experience_years:12},
+    {doctor_id:'D2',name:'Dr. Rajesh Kumar',hospital:'Manipal Hospital',specialization:'General Medicine',phone:'+918022344444',experience_years:8},
+    {doctor_id:'D3',name:'Dr. Anitha Rao',hospital:'Narayana Health',specialization:'Pulmonology',phone:'+918044332211',experience_years:10},
+  ],
+  authTab: 'login',
+};
+
+// Inline translations (no external fetch needed in demo)
+TRANSLATIONS = {
+  en:{appName:"Health-Twin",tagline:"AI Health Intelligence",selectRole:"Who are you today?",patient:"Patient",doctor:"Doctor",patientDesc:"Monitor your health & get AI-powered insights",doctorDesc:"Manage your profile & receive patient alerts",login:"Sign In",register:"Create Account",username:"Username",password:"Password",fullName:"Full Name",phone:"Phone Number",age:"Age",gender:"Gender",male:"Male",female:"Female",other:"Other",hospital:"Hospital",specialization:"Specialization",experience:"Exp. Years",submit:"Continue",logout:"Logout",dashboard:"Dashboard",analyze:"Analyze My Health",analyzing:"Analyzing...",heartRate:"Heart Rate",temperature:"Temperature (°F)",sleepHours:"Sleep Hours",symptoms:"Symptoms",riskScore:"Health Score",riskLevel:"Risk Level",low:"Low Risk",medium:"Medium Risk",high:"High Risk",recommendations:"Recommendations",matchedDoctors:"Recommended Doctors",liveHeartRate:"Live Heart Rate",bpm:"BPM",connecting:"Connecting...",connected:"Sensor connected",noSensor:"Mock mode",history:"Health History",doctorDashboard:"Doctor Dashboard",registerDoctor:"Register Doctor",savedDoctors:"Registered Doctors",smsAlert:"SMS Alert Sent!",highRiskAlert:"High risk — finding doctors...",noHistory:"No history yet",language:"Language",chooseSymptoms:"Select all that apply",fever:"Fever",cough:"Cough",fatigue:"Fatigue",headache:"Headache",chestPain:"Chest Pain",breathShort:"Shortness of Breath",nausea:"Nausea",dizzy:"Dizziness",bmi:"BMI",bioAge:"Bio Age",liveFeed:"Live Feed",startSensor:"Start Mock Sensor",stopSensor:"Stop Sensor",sensorRunning:"Sensor Running",call:"Call",route:"Route",nearbyHospitals:"Nearby Hospitals",contactDoctor:"Contact",doctorProfile:"Doctor Profile",registeredOn:"Registered on",patients:"Patient Records",allDoctors:"All Doctors",healthInput:"Health Input",results:"Analysis Results",noResults:"Run an analysis first"},
+  te:{appName:"హెల్త్-ట్విన్",tagline:"AI ఆరోగ్య గుప్తచర",selectRole:"మీరు ఎవరు?",patient:"రోగి",doctor:"వైద్యుడు",patientDesc:"మీ ఆరోగ్యాన్ని పర్యవేక్షించండి",doctorDesc:"మీ ప్రొఫైల్ నిర్వహించండి",login:"లాగిన్",register:"ఖాతా సృష్టించండి",username:"వినియోగదారు పేరు",password:"పాస్‌వర్డ్",fullName:"పూర్తి పేరు",phone:"ఫోన్ నంబర్",age:"వయసు",gender:"లింగం",male:"పురుషుడు",female:"స్త్రీ",other:"ఇతర",hospital:"ఆసుపత్రి",specialization:"విశేషత",experience:"అనుభవం",submit:"కొనసాగించు",logout:"లాగ్అవుట్",dashboard:"డాష్‌బోర్డ్",analyze:"ఆరోగ్యాన్ని విశ్లేషించు",analyzing:"విశ్లేషిస్తోంది...",heartRate:"హృదయ స్పందన",temperature:"ఉష్ణోగ్రత (°F)",sleepHours:"నిద్ర గంటలు",symptoms:"లక్షణాలు",riskScore:"ఆరోగ్య స్కోర్",riskLevel:"ప్రమాద స్థాయి",low:"తక్కువ ప్రమాదం",medium:"మధ్యమ ప్రమాదం",high:"అధిక ప్రమాదం",recommendations:"సిఫార్సులు",matchedDoctors:"వైద్యులు",liveHeartRate:"లైవ్ హృదయ స్పందన",bpm:"బిపిఎం",connecting:"కనెక్ట్ అవుతోంది...",connected:"సెన్సార్ కనెక్ట్",noSensor:"మాక్ మోడ్",history:"ఆరోగ్య చరిత్ర",doctorDashboard:"వైద్య డాష్‌బోర్డ్",registerDoctor:"వైద్యుడిగా నమోదు",savedDoctors:"నమోదిత వైద్యులు",smsAlert:"SMS పంపబడింది!",highRiskAlert:"అధిక ప్రమాదం గుర్తించబడింది",noHistory:"చరిత్ర లేదు",language:"భాష",chooseSymptoms:"ఎంచుకోండి",fever:"జ్వరం",cough:"దగ్గు",fatigue:"అలసట",headache:"తలనొప్పి",chestPain:"ఛాతీ నొప్పి",breathShort:"శ్వాస తగ్గడం",nausea:"వాంతి",dizzy:"తల తిరగడం",bmi:"BMI",bioAge:"జీవ వయసు",liveFeed:"లైవ్ ఫీడ్",startSensor:"మాక్ సెన్సార్",stopSensor:"ఆపు",sensorRunning:"నడుస్తోంది",call:"కాల్",route:"మార్గం",nearbyHospitals:"సమీప ఆసుపత్రులు",contactDoctor:"సంప్రదించు",doctorProfile:"వైద్య ప్రొఫైల్",registeredOn:"నమోదు తేదీ",patients:"రోగి రికార్డులు",allDoctors:"అన్ని వైద్యులు",healthInput:"ఆరోగ్య ఇన్‌పుట్",results:"విశ్లేషణ ఫలితాలు",noResults:"ముందు విశ్లేషణ చేయండి"},
+  kn:{appName:"ಹೆಲ್ತ್-ಟ್ವಿನ್",tagline:"AI ಆರೋಗ್ಯ ಬುದ್ಧಿಮತ್ತೆ",selectRole:"ನೀವು ಯಾರು?",patient:"ರೋಗಿ",doctor:"ವೈದ್ಯರು",patientDesc:"ಆರೋಗ್ಯ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ",doctorDesc:"ಪ್ರೊಫೈಲ್ ನಿರ್ವಹಿಸಿ",login:"ಸೈನ್ ಇನ್",register:"ಖಾತೆ ರಚಿಸಿ",username:"ಬಳಕೆದಾರ ಹೆಸರು",password:"ಪಾಸ್‌ವರ್ಡ್",fullName:"ಪೂರ್ಣ ಹೆಸರು",phone:"ಫೋನ್ ಸಂಖ್ಯೆ",age:"ವಯಸ್ಸು",gender:"ಲಿಂಗ",male:"ಪುರುಷ",female:"ಮಹಿಳೆ",other:"ಇತರ",hospital:"ಆಸ್ಪತ್ರೆ",specialization:"ವಿಶೇಷತೆ",experience:"ಅನುಭವ",submit:"ಮುಂದುವರೆಯಿರಿ",logout:"ಲಾಗ್ಔಟ್",dashboard:"ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",analyze:"ಆರೋಗ್ಯ ವಿಶ್ಲೇಷಿಸಿ",analyzing:"ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",heartRate:"ಹೃದಯ ಬಡಿತ",temperature:"ತಾಪಮಾನ (°F)",sleepHours:"ನಿದ್ದೆ ಗಂಟೆಗಳು",symptoms:"ರೋಗಲಕ್ಷಣಗಳು",riskScore:"ಆರೋಗ್ಯ ಸ್ಕೋರ್",riskLevel:"ಅಪಾಯದ ಮಟ್ಟ",low:"ಕಡಿಮೆ ಅಪಾಯ",medium:"ಮಧ್ಯಮ ಅಪಾಯ",high:"ಅಧಿಕ ಅಪಾಯ",recommendations:"ಶಿಫಾರಸುಗಳು",matchedDoctors:"ವೈದ್ಯರು",liveHeartRate:"ಲೈವ್ ಹೃದಯ ಬಡಿತ",bpm:"ಬಿಪಿಎಂ",connecting:"ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ...",connected:"ಸಂಪರ್ಕಿಸಲಾಗಿದೆ",noSensor:"ಮಾಕ್ ಮೋಡ್",history:"ಆರೋಗ್ಯ ಇತಿಹಾಸ",doctorDashboard:"ವೈದ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",registerDoctor:"ವೈದ್ಯರಾಗಿ ನೋಂದಾಯಿಸಿ",savedDoctors:"ನೋಂದಾಯಿತ ವೈದ್ಯರು",smsAlert:"SMS ಕಳುಹಿಸಲಾಗಿದೆ!",highRiskAlert:"ಅಧಿಕ ಅಪಾಯ ಪತ್ತೆಯಾಗಿದೆ",noHistory:"ಇನ್ನೂ ಇತಿಹಾಸ ಇಲ್ಲ",language:"ಭಾಷೆ",chooseSymptoms:"ಆಯ್ಕೆಮಾಡಿ",fever:"ಜ್ವರ",cough:"ಕೆಮ್ಮು",fatigue:"ಆಯಾಸ",headache:"ತಲೆನೋವು",chestPain:"ಎದೆ ನೋವು",breathShort:"ಉಸಿರಾಟ ತೊಂದರೆ",nausea:"ವಾಂತಿ",dizzy:"ತಲೆ ಸುತ್ತು",bmi:"BMI",bioAge:"ಜೈವಿಕ ವಯಸ್ಸು",liveFeed:"ಲೈವ್ ಫೀಡ್",startSensor:"ಮಾಕ್ ಸೆನ್ಸಾರ್",stopSensor:"ನಿಲ್ಲಿಸಿ",sensorRunning:"ಚಾಲನೆಯಲ್ಲಿದೆ",call:"ಕರೆ",route:"ಮಾರ್ಗ",nearbyHospitals:"ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು",contactDoctor:"ಸಂಪರ್ಕಿಸಿ",doctorProfile:"ವೈದ್ಯ ಪ್ರೊಫೈಲ್",registeredOn:"ನೋಂದಣಿ ದಿನಾಂಕ",patients:"ರೋಗಿ ದಾಖಲೆಗಳು",allDoctors:"ಎಲ್ಲ ವೈದ್ಯರು",healthInput:"ಆರೋಗ್ಯ ಇನ್‌ಪುಟ್",results:"ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು",noResults:"ಮೊದಲು ವಿಶ್ಲೇಷಿಸಿ"}
+};
+
+
+
+
+let hrData = [];
+let labels = [];
+
+const ctx = document.getElementById('hr-chart').getContext('2d');
+
+
+
+
+function t(k){ return (TRANSLATIONS[state.lang]||TRANSLATIONS.en)[k] || k; }
+
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA') el.placeholder = t(k);
+    else el.textContent = t(k);
+  });
+  // Landing
+  const map = {
+    'l-appName':'appName','l-tagline':'tagline','l-selectRole':'selectRole',
+    'l-patient':'patient','l-doctor':'doctor','l-patientDesc':'patientDesc','l-doctorDesc':'doctorDesc'
+  };
+  Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.textContent=t(key); });
+}
+
+function setLang(lang, btn){
+  state.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const sel = document.getElementById('sb-lang-sel');
+  if(sel) sel.value = lang;
+  applyTranslations();
+  if(state.token) renderCurrentPage();
+}
+function changeLang(lang){
+  state.lang = lang;
+  applyTranslations();
+  if(state.token) renderCurrentPage();
+}
+
+// ══════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════
+async function api(path, method='GET', body=null){
+  try{
+    const opts={method,headers:{'Content-Type':'application/json'}};
+    if(state.token) opts.headers['X-Auth-Token']=state.token;
+    if(body) opts.body=JSON.stringify(body);
+    const r=await fetch(API+path,opts);
+    return await r.json();
+  }catch(e){
+    // Backend offline: return mock data
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════
+// AUTH FLOW
+// ══════════════════════════════════════════════════
+let currentPage = 'dashboard';
+
+function showLanding(){
+  document.getElementById('landing').style.display='flex';
+  document.getElementById('auth-modal').style.display='none';
+  document.getElementById('auth-box').style.display='none';
+}
+
+function chooseRole(role){
+  state.role = role;
+  document.getElementById('landing').style.display='none';
+  document.getElementById('auth-modal').style.display='flex';
+  document.getElementById('auth-box').style.display='block';
+  document.getElementById('auth-title').textContent = role==='patient'?t('patient'):t('doctor');
+  document.getElementById('auth-subtitle').textContent = role==='patient'?t('patientDesc'):t('doctorDesc');
+  document.getElementById('doc-extra-fields').style.display = role==='doctor'?'block':'none';
+}
+
+function switchAuthTab(tab){
+  state.authTab = tab;
+  document.getElementById('form-login').style.display  = tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display = tab==='register'?'block':'none';
+  document.getElementById('tab-login').className   = 'auth-tab'+(tab==='login'?' active':'');
+  document.getElementById('tab-register').className = 'auth-tab'+(tab==='register'?' active':'');
+  document.getElementById('auth-err').style.display='none';
+}
+
+function showAuthError(msg){
+  const el=document.getElementById('auth-err');
+  el.textContent=msg; el.style.display='block';
+}
+
+async function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  if(!u||!p){showAuthError('Please fill all fields');return;}
+  const btn=document.getElementById('btn-login');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const res=await api('/auth/login','POST',{username:u,password:p});
+  btn.disabled=false; btn.textContent=t('login');
+  if(!res||res.error){
+    // Demo mode: mock login
+    enterApp({token:'demo_token',patient_id:'P_DEMO',full_name:u,role:state.role||'patient',profile:{},language:state.lang});
+    return;
+  }
+  enterApp(res);
+}
+
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const uname=document.getElementById('reg-user').value.trim();
+  const pw=document.getElementById('reg-pass').value;
+  if(!name||!uname||!pw){showAuthError('Please fill all fields');return;}
+  const btn=document.getElementById('btn-register');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const payload={full_name:name,username:uname,password:pw,
+    age:+document.getElementById('reg-age').value,
+    gender:document.getElementById('reg-gender').value,
+    phone:document.getElementById('reg-phone').value,
+    language:state.lang,role:state.role||'patient'};
+  if(state.role==='doctor'){
+    payload.doctor_info={
+      hospital:document.getElementById('reg-hospital').value,
+      specialization:document.getElementById('reg-spec').value,
+      experience_years:+document.getElementById('reg-exp').value
+    };
+  }
+  const res=await api('/auth/register','POST',payload);
+  btn.disabled=false; btn.textContent=t('register');
+  if(!res||res.error){
+    // Backend offline: demo mode — allow registration locally
+    if(!res){
+      enterApp({token:'demo_token',patient_id:'P_'+Date.now(),full_name:payload.full_name,role:state.role||'patient',profile:payload,language:state.lang});
+      return;
+    }
+    showAuthError(res?.error||'Registration failed');return;
+  }
+  enterApp(res);
+}
+
+function enterApp(data){
+  state.token=data.token; state.patient_id=data.patient_id;
+  state.full_name=data.full_name; state.profile=data.profile||{};
+  if(data.role) state.role=data.role;
+  if(data.language) state.lang=data.language;
+  document.getElementById('auth-modal').style.display='none';
+  document.getElementById('landing').style.display='none';
+  document.getElementById('shell').style.display='grid';
+  document.getElementById('sb-uname').textContent=state.full_name;
+  document.getElementById('sb-urole').textContent=state.role==='doctor'?t('doctor'):t('patient');
+  document.getElementById('sb-avatar').textContent=state.role==='doctor'?'👨‍⚕️':'🧑';
+  renderNav();
+  startSensorBackground();
+  navigate('dashboard');
+}
+
+function doLogout(){
+  api('/auth/logout','POST');
+  state.token=null; state.patient_id=null; state.lastResult=null;
+  clearInterval(state.sensorInterval); state.sensorInterval=null;
+  document.getElementById('shell').style.display='none';
+  document.getElementById('landing').style.display='flex';
+  showToast('Logged out. See you! 👋');
+}
+
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
+function renderNav(){
+  const patientNav=[
+    {id:'dashboard',icon:'📊',label:'dashboard'},
+    {id:'analyze',icon:'🔬',label:'healthInput'},
+    {id:'results',icon:'📈',label:'results'},
+    {id:'history',icon:'🗂️',label:'history'},
+    {id:'hospitals',icon:'🏥',label:'nearbyHospitals'},
+  ];
+  const doctorNav=[
+    {id:'dashboard',icon:'📊',label:'doctorDashboard'},
+    {id:'doc-register',icon:'📝',label:'registerDoctor'},
+    {id:'doc-list',icon:'👨‍⚕️',label:'allDoctors'},
+  ];
+  const navItems = state.role==='doctor' ? doctorNav : patientNav;
+  const navEl=document.getElementById('sb-nav');
+  navEl.innerHTML=`<div class="sb-section">Menu</div>`+
+    navItems.map(n=>`<button class="nav-item" id="nav-${n.id}" onclick="navigate('${n.id}')">
+      <span class="ni-icon">${n.icon}</span> ${t(n.label)}
+    </button>`).join('')+
+    `<div class="sb-section" style="margin-top:16px">Account</div>
+    <button class="nav-item" onclick="doLogout()"><span class="ni-icon">🚪</span> ${t('logout')}</button>`;
+}
+
+function navigate(page){
+  currentPage=page;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const active=document.getElementById(`nav-${page}`);
+  if(active) active.classList.add('active');
+  renderCurrentPage();
+}
+
+function renderCurrentPage(){
+  const mc=document.getElementById('main-content');
+  mc.innerHTML='';
+  if(state.role==='doctor'){
+    if(currentPage==='dashboard') renderDoctorDashboard(mc);
+    else if(currentPage==='doc-register') renderDoctorRegister(mc);
+    else if(currentPage==='doc-list') renderDoctorList(mc);
+    else renderDoctorDashboard(mc);
+  } else {
+    if(currentPage==='dashboard') renderPatientDashboard(mc);
+    else if(currentPage==='analyze') renderAnalyzeForm(mc);
+    else if(currentPage==='results') renderResults(mc);
+    else if(currentPage==='history') renderHistory(mc);
+    else if(currentPage==='hospitals') renderHospitals(mc);
+    else renderPatientDashboard(mc);
+  }
+  applyTranslations();
+}
+
+// ══════════════════════════════════════════════════
+// SENSOR (Mock ESP32)
+// ══════════════════════════════════════════════════
+function startSensorBackground(){
+  // Simulate slow background drift
+  setInterval(()=>{
+    if(!state.sensorRunning){
+      const drift = (Math.random()-.5)*2;
+      state.heartRate = Math.max(50,Math.min(110,Math.round(state.heartRate+drift)));
+      updateSidebarVitals();
+    }
+  },3000);
+}
+setInterval(() => {
+  fetch("http://192.168.31.55:5000/iot/heartrate/latest")
+    .then(res => res.json())
+    .then(data => {
+      console.log(data.heart_rate);
+      updateGraph(data.heart_rate);
+    });
+}, 2000);
+
+function startMockSensor(){
+  if(state.sensorRunning) return;
+  state.sensorRunning=true;
+  state.sensorInterval=setInterval(async()=>{
+    const t_val = Date.now()/1000;
+    const wave = Math.sin(t_val/40)*8;
+    const noise = (Math.random()-.5)*4;
+    const spike = Math.random()<0.03?20:0;
+    const bpm = Math.max(48,Math.min(155,Math.round(72+wave+noise+spike)));
+    state.heartRate=bpm;
+    state.hrHistory.push(bpm);
+    if(state.hrHistory.length>60) state.hrHistory.shift();
+    updateHRDisplay(bpm);
+    updateSidebarVitals();
+    // Also post to backend
+    await api('/iot/heartrate','POST',{patient_id:state.patient_id,heart_rate:bpm});
+  },1500);
+  document.getElementById('sensor-btn')?.innerHTML && updateSensorBtn();
+  showToast('🫀 Mock sensor started');
+}
+
+function stopMockSensor(){
+  clearInterval(state.sensorInterval);
+  state.sensorInterval=null; state.sensorRunning=false;
+  updateSensorBtn();
+  showToast('Sensor stopped');
+}
+
+function updateSensorBtn(){
+  const btn=document.getElementById('sensor-btn');
+  if(!btn) return;
+  if(state.sensorRunning){
+    btn.textContent=t('stopSensor');
+    btn.className='btn btn-danger';
+    btn.onclick=stopMockSensor;
+  } else {
+    btn.textContent=t('startSensor');
+    btn.className='btn btn-green';
+    btn.onclick=startMockSensor;
+  }
+}
+
+function updateHRDisplay(bpm){
+  const el=document.getElementById('live-hr-num');
+  if(el) el.textContent=bpm;
+  const dot=document.getElementById('sensor-dot');
+  if(dot){ dot.className='sensor-dot '+(state.sensorRunning?'live':''); }
+  updateHRChart(bpm);
+}
+function checkHeartRate(hr){
+  if(hr > 65){
+    sendSMSAlert(hr);
+  }
+}
+
+function sendSMSAlert(hr){
+  console.log("🚨 SMS ALERT:", hr);
+
+  // later connect backend here
+}
+
+function updateSidebarVitals(){
+  document.getElementById('sb-hr').textContent=state.heartRate;
+  if(state.lastResult) document.getElementById('sb-score').textContent=state.lastResult.score;
+}
+
+// Chart
+let hrChart=null;
+function initHRChart(){
+  const canvas=document.getElementById('hr-chart');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  if(hrChart){ hrChart.destroy(); hrChart=null; }
+  const labels=Array.from({length:30},(_,i)=>i===29?'now':`-${29-i}s`);
+  const data=Array(30).fill(72);
+  hrChart=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{
+      label:'BPM',data,borderColor:'#f55a51',borderWidth:2,
+      backgroundColor:'rgba(245,90,81,.08)',tension:.4,fill:true,
+      pointRadius:0,pointHoverRadius:4,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},
+      scales:{
+        x:{ticks:{color:'#3b4570',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{min:40,max:160,ticks:{color:'#3b4570',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}}
+      },
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
+        callbacks:{label:ctx=>`${ctx.parsed.y} BPM`}}}
+    }
+  });
+}
+
+function updateHRChart(bpm){
+  if(!hrChart) return;
+  const ds=hrChart.data.datasets[0];
+  ds.data.shift(); ds.data.push(bpm);
+  hrChart.update('none');
+}
+
+// Poll backend for real ESP32 data
+async function pollESP32(){
+  const res=await api(`/iot/heartrate/${state.patient_id}`);
+  if(res?.heart_rate && !state.sensorRunning){
+    state.heartRate=res.heart_rate;
+    state.hrHistory.push(res.heart_rate);
+    if(state.hrHistory.length>60) state.hrHistory.shift();
+    updateHRDisplay(res.heart_rate);
+    updateHRChart(res.heart_rate);
+    checkHeartRate(res.heart_rate); // ✅ ADD THIS LINE HERE
+  }
+}
+
+// ══════════════════════════════════════════════════
+// PATIENT DASHBOARD
+// ══════════════════════════════════════════════════
+function renderPatientDashboard(mc){
+  const r=state.lastResult;
+  const score=r?r.score:'—';
+  const level=r?r.risk_level:'—';
+  const bmi=r?r.bmi:'—';
+  const bioAge=r?r.bio_age:'—';
+  const hr=state.heartRate;
+
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div>
+    <div class="page-title">👋 ${t('dashboard')}, ${state.full_name?.split(' ')[0]||'User'}</div>
+    <div class="page-sub">${new Date().toLocaleDateString(state.lang==='en'?'en-IN':'en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+  </div>
+  <button class="btn btn-primary" onclick="navigate('analyze')">🔬 ${t('analyze')}</button>
+</div>
+
+<div class="g4 anim" style="animation-delay:.05s">
+  <div class="metric blue">
+    <div class="metric-accent" style="background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
+    <div class="metric-icon" style="background:var(--accent-glow)">❤️</div>
+    <div class="metric-val">${hr}</div>
+    <div class="metric-lbl">${t('heartRate')}</div>
+    <div class="metric-sub">${t('bpm')}</div>
+    <div class="metric-bar"><div class="metric-bar-fill" style="width:${Math.min(100,(hr/160)*100)}%;background:var(--red)"></div></div>
+  </div>
+  <div class="metric ${level==='Low'?'green':level==='Medium'?'amber':'red'}">
+    <div class="metric-accent" style="background:${level==='Low'?'var(--green)':level==='Medium'?'var(--amber)':'var(--red)'}"></div>
+    <div class="metric-icon" style="background:${level==='Low'?'var(--green-d)':level==='Medium'?'var(--amber-d)':'var(--red-d)'}">🛡️</div>
+    <div class="metric-val" style="color:${level==='Low'?'var(--green)':level==='Medium'?'var(--amber)':'var(--red)'}">${score}</div>
+    <div class="metric-lbl">${t('riskScore')}</div>
+    <div class="metric-sub">${level!=='—'?t(level.toLowerCase()):t('noResults')}</div>
+    <div class="metric-bar"><div class="metric-bar-fill" style="width:${score!=='—'?score:0}%;background:${level==='Low'?'var(--green)':level==='Medium'?'var(--amber)':'var(--red)'}"></div></div>
+  </div>
+  <div class="metric teal">
+    <div class="metric-accent" style="background:var(--teal)"></div>
+    <div class="metric-icon" style="background:var(--teal-d)">📊</div>
+    <div class="metric-val">${bmi}</div>
+    <div class="metric-lbl">${t('bmi')}</div>
+    <div class="metric-sub">${bmi!=='—'?(bmi<18.5?'Underweight':bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'}</div>
+    <div class="metric-bar"><div class="metric-bar-fill" style="width:${bmi!=='—'?Math.min(100,(bmi/40)*100):0}%;background:var(--teal)"></div></div>
+  </div>
+  <div class="metric purple">
+    <div class="metric-accent" style="background:var(--accent2)"></div>
+    <div class="metric-icon" style="background:var(--purple-l, rgba(123,108,246,.15))">🧬</div>
+    <div class="metric-val">${bioAge}</div>
+    <div class="metric-lbl">${t('bioAge')}</div>
+    <div class="metric-sub">${bioAge!=='—'?`vs chronological ${state.profile?.age||'—'}`:'—'}</div>
+    <div class="metric-bar"><div class="metric-bar-fill" style="width:${bioAge!=='—'?Math.min(100,(bioAge/100)*100):0}%;background:var(--accent2)"></div></div>
+  </div>
+</div>
+
+<div class="g2 anim" style="animation-delay:.1s">
+  <div class="card">
+    <div class="card-title">🫀 ${t('liveHeartRate')}
+      <span style="float:right;font-size:10px;font-weight:400;color:var(--text3)">
+        <span class="sensor-dot${state.sensorRunning?' live':''}" id="sensor-dot"></span>
+        ${state.sensorRunning?t('sensorRunning'):t('noSensor')}
+      </span>
+    </div>
+    <div class="hr-display" style="margin-bottom:14px">
+      <div class="hr-pulse">❤️</div>
+      <div>
+        <div class="hr-num" id="live-hr-num">${hr}</div>
+        <div class="hr-unit">${t('bpm')}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:11px;color:var(--text2)">${hr<60?'Low':hr<=100?'Normal':hr<=110?'Elevated':'High'}</div>
+        <div class="hr-status">Target: 60–100</div>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="hr-chart"></canvas></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn ${state.sensorRunning?'btn-danger':'btn-green'}" id="sensor-btn"
+        onclick="${state.sensorRunning?'stopMockSensor':'startMockSensor'}()"
+        style="flex:1">${state.sensorRunning?t('stopSensor'):t('startSensor')}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 ${t('history')}</div>
+    <div id="hist-list">
+    ${state.analysisHistory.length===0
+      ? `<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:12px">
+          <div style="font-size:32px;margin-bottom:10px">📭</div>
+          ${t('noHistory')}<br/>
+          <button class="btn btn-primary" style="margin-top:12px" onclick="navigate('analyze')">Start Analysis</button>
+        </div>`
+      : state.analysisHistory.slice().reverse().map((h,i)=>`
+        <div class="hist-item" onclick="viewHistory(${state.analysisHistory.length-1-i})">
+          <div class="hist-dot" style="background:${h.level==='Low'?'var(--green)':h.level==='Medium'?'var(--amber)':'var(--red)'}"></div>
+          <div class="hist-info">
+            <div class="hist-date">${new Date(h.ts).toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--text2)">${t(h.level?.toLowerCase()||'low')} · HR ${h.hr} BPM</div>
+          </div>
+          <div class="hist-score" style="color:${h.level==='Low'?'var(--green)':h.level==='Medium'?'var(--amber)':'var(--red)'}">${h.score}</div>
+        </div>`).join('')
+    }
+    </div>
+  </div>
+</div>`;
+
+  // Build doctors to consult section
+  const allDocs = state.registeredDoctors || [];
+  const isHighRisk = state.lastResult && state.lastResult.risk_level === 'High';
+  const matchedDocs = (state.lastResult && state.lastResult.matched_doctors) || [];
+  // Merge matched + registered, deduplicate by doctor_id or name
+  const combinedDocs = [...matchedDocs];
+  allDocs.forEach(d => {
+    if (!combinedDocs.find(x => x.doctor_id === d.doctor_id || x.name === d.name)) combinedDocs.push(d);
+  });
+
+  const doctorsSectionEl = document.createElement('div');
+  doctorsSectionEl.className = 'card anim';
+  doctorsSectionEl.style.animationDelay = '.15s';
+  const riskBannerHtml = isHighRisk
+    ? `<div class="alert-banner alert-high" style="margin-bottom:16px">
+        <span style="font-size:20px">🚨</span>
+        <div><strong>High Risk Detected!</strong> — Please consult one of the doctors below immediately.</div>
+       </div>`
+    : '';
+  const docsHtml = combinedDocs.length > 0
+    ? combinedDocs.map(d => `
+      <div class="doc-card" style="${isHighRisk ? 'border-color:rgba(245,90,81,.35);' : ''}">
+        <div class="doc-avatar" style="${isHighRisk ? 'background:var(--red-d);border:1px solid rgba(245,90,81,.3)' : ''}">👨‍⚕️</div>
+        <div class="doc-info">
+          <div class="doc-name">${d.name}</div>
+          <div class="doc-spec">${d.specialization}${d.experience_years ? ' · ' + d.experience_years + ' yrs' : ''}</div>
+          <div class="doc-hosp">🏥 ${d.hospital || '—'}</div>
+        </div>
+        <div class="doc-actions">
+          ${d.phone ? `<a href="tel:${d.phone}" class="btn btn-primary" style="font-size:11px;padding:7px 13px">📞 ${t('call')}</a>` : ''}
+        </div>
+      </div>`).join('')
+    : `<div style="text-align:center;padding:28px 0;color:var(--text3);font-size:12px">
+        <div style="font-size:28px;margin-bottom:8px">👨‍⚕️</div>
+        No doctors registered yet. <button class="btn btn-ghost" style="margin-left:8px;font-size:11px" onclick="navigate('doc-list')">Browse Doctors</button>
+       </div>`;
+
+  doctorsSectionEl.innerHTML = `
+    <div class="card-title" style="${isHighRisk ? 'color:var(--red)' : ''}">
+      ${isHighRisk ? '🚨' : '👨‍⚕️'} Doctors to Consult
+      <span style="float:right;font-size:10px;font-weight:400;color:var(--text3)">${combinedDocs.length} available</span>
+    </div>
+    ${riskBannerHtml}
+    ${docsHtml}
+  `;
+  mc.appendChild(doctorsSectionEl);
+
+  setTimeout(()=>{ initHRChart(); updateHRDisplay(state.heartRate); },50);
+  setInterval(pollESP32, 5000);
+}
+
+// ══════════════════════════════════════════════════
+// ANALYZE FORM
+// ══════════════════════════════════════════════════
+const SYMPTOMS=[
+  {id:'fever',emoji:'🌡️'},{id:'cough',emoji:'😷'},{id:'fatigue',emoji:'😩'},
+  {id:'headache',emoji:'🤕'},{id:'chestPain',emoji:'💔'},{id:'breathShort',emoji:'😮‍💨'},
+  {id:'nausea',emoji:'🤢'},{id:'dizzy',emoji:'😵'}
+];
+
+function renderAnalyzeForm(mc){
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">🔬 ${t('healthInput')}</div><div class="page-sub">Fill in your health parameters for AI analysis</div></div>
+</div>
+
+<div class="g2 anim" style="animation-delay:.05s">
+  <div class="card">
+    <div class="card-title">👤 Basic Info</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" data-i18n="age">Age</label>
+        <input type="number" class="form-input" id="f-age" value="${state.profile?.age||30}" min="1" max="120"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label" data-i18n="gender">Gender</label>
+        <select class="form-select" id="f-gender">
+          <option value="Male" ${state.profile?.gender==='Male'?'selected':''}>Male</option>
+          <option value="Female" ${state.profile?.gender==='Female'?'selected':''}>Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Height (cm)</label>
+        <input type="number" class="form-input" id="f-height" value="${state.profile?.height_cm||170}"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Weight (kg)</label>
+        <input type="number" class="form-input" id="f-weight" value="${state.profile?.weight_kg||70}"/>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label" data-i18n="temperature">Temperature (°F)</label>
+      <input type="number" class="form-input" id="f-temp" value="98.6" step="0.1" min="90" max="110"/>
+    </div>
+    <div class="form-field">
+      <label class="form-label" data-i18n="sleepHours">Sleep Hours</label>
+      <input type="range" class="form-input" id="f-sleep" value="${state.profile?.sleep_hours||7}" min="2" max="12" step=".5"
+        oninput="document.getElementById('sleep-val').textContent=this.value+' hrs'"/>
+      <div style="text-align:right;font-size:11px;color:var(--text2);margin-top:3px" id="sleep-val">${state.profile?.sleep_hours||7} hrs</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🩺 Vitals & Lifestyle</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Heart Rate (BPM)</label>
+        <input type="number" class="form-input" id="f-hr" value="${state.heartRate}" min="30" max="200"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Systolic BP (mmHg)</label>
+        <input type="number" class="form-input" id="f-sbp" value="${state.profile?.systolic_bp||118}"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Diastolic BP (mmHg)</label>
+        <input type="number" class="form-input" id="f-dbp" value="${state.profile?.diastolic_bp||76}"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Daily Steps</label>
+        <input type="number" class="form-input" id="f-steps" value="${state.profile?.daily_steps||7000}"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Stress Level (1–10)</label>
+        <input type="range" class="form-input" id="f-stress" value="${state.profile?.stress_level||4}" min="1" max="10"
+          oninput="document.getElementById('stress-val').textContent=this.value"/>
+        <div style="text-align:right;font-size:11px;color:var(--text2);margin-top:3px" id="stress-val">${state.profile?.stress_level||4}</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Exercise Frequency</label>
+        <select class="form-select" id="f-ex">
+          <option>Daily</option><option>3-5 times/week</option><option>1-2 times/week</option><option>None</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Diet Quality</label>
+        <select class="form-select" id="f-diet">
+          <option>Excellent</option><option selected>Good</option><option>Average</option><option>Poor</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Smoker</label>
+        <select class="form-select" id="f-smoke">
+          <option selected>No</option><option>Yes</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Alcohol Consumption</label>
+      <select class="form-select" id="f-alc">
+        <option selected>None</option><option>Moderate</option><option>High</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card anim" style="animation-delay:.1s">
+  <div class="card-title" data-i18n="symptoms">Symptoms</div>
+  <div style="font-size:11px;color:var(--text2);margin-bottom:8px" data-i18n="chooseSymptoms">Select all that apply</div>
+  <div class="symptom-grid" id="sym-grid">
+    ${SYMPTOMS.map(s=>`<div class="sym-chip" id="sym-${s.id}" onclick="toggleSym('${s.id}')">${s.emoji} ${t(s.id)}</div>`).join('')}
+  </div>
+</div>
+
+<button class="btn btn-primary btn-lg anim" id="analyze-btn" onclick="doAnalyze()" style="animation-delay:.15s">
+  🔬 ${t('analyze')}
+</button>`;
+}
+
+const selectedSymptoms=new Set();
+function toggleSym(id){
+  if(selectedSymptoms.has(id)){selectedSymptoms.delete(id);document.getElementById('sym-'+id).classList.remove('sel');}
+  else{selectedSymptoms.add(id);document.getElementById('sym-'+id).classList.add('sel');}
+}
+
+function symptomsToAPI(){
+  const map={chestPain:'chest_pain',breathShort:'shortness_of_breath'};
+  return [...selectedSymptoms].map(s=>map[s]||s);
+}
+
+async function doAnalyze(){
+  const btn=document.getElementById('analyze-btn');
+  btn.disabled=true; btn.innerHTML=`<span class="spin"></span> ${t('analyzing')}`;
+  const payload={
+    patient_id:state.patient_id, age:+document.getElementById('f-age').value,
+    gender:document.getElementById('f-gender').value,
+    height_cm:+document.getElementById('f-height').value,
+    weight_kg:+document.getElementById('f-weight').value,
+    sleep_hours:+document.getElementById('f-sleep').value,
+    heart_rate:+document.getElementById('f-hr').value,
+    systolic_bp:+document.getElementById('f-sbp').value,
+    diastolic_bp:+document.getElementById('f-dbp').value,
+    daily_steps:+document.getElementById('f-steps').value,
+    stress_level:+document.getElementById('f-stress').value,
+    exercise_freq:document.getElementById('f-ex').value,
+    diet_quality:document.getElementById('f-diet').value,
+    smoker:document.getElementById('f-smoke').value,
+    alcohol:document.getElementById('f-alc').value,
+    temperature:+document.getElementById('f-temp').value,
+    symptoms:symptomsToAPI(),
+  };
+
+  let res=await api('/analyze','POST',payload);
+  if(!res){
+    // Demo: compute locally
+    res=computeLocalRisk(payload);
+  }
+
+  state.lastResult=res;
+  state.analysisHistory.push({
+    ts:new Date().toISOString(), score:res.score, level:res.risk_level,
+    hr:payload.heart_rate, bmi:res.bmi
+  });
+  updateSidebarVitals();
+
+  if(res.risk_level==='High') showToast('🚨 '+t('highRiskAlert'),4000);
+  else if(res.risk_level==='Medium') showToast('⚠️ Medium risk detected',3000);
+  else showToast('✅ Analysis complete',2000);
+
+  navigate('results');
+}
+
+
+
+function computeLocalRisk(d){
+  const bmi=d.weight_kg/((d.height_cm/100)**2);
+  let lr=15;
+  if(bmi>30)lr+=18;else if(bmi>25)lr+=10;else if(bmi<18.5)lr+=6;
+  if(d.smoker==='Yes')lr+=22;
+  if(d.alcohol==='Moderate')lr+=10;else if(d.alcohol==='High')lr+=18;
+  lr+=Math.max(0,(d.stress_level-5)*3);
+  if(d.sleep_hours<6)lr+=14;else if(d.sleep_hours<7)lr+=7;
+  const exm={Daily:0,'3-5 times/week':5,'1-2 times/week':12,None:20};
+  lr+=exm[d.exercise_freq]||0;
+  const dm={Excellent:0,Good:5,Average:12,Poor:20};
+  lr+=dm[d.diet_quality]||0;
+  if(d.heart_rate>100)lr+=8;
+  if(d.systolic_bp>140)lr+=15;else if(d.systolic_bp>130)lr+=8;
+  const danger=['chest_pain','shortness_of_breath'];
+  lr+=d.symptoms.filter(s=>danger.includes(s)).length*15;
+  lr+=d.symptoms.filter(s=>!danger.includes(s)).length*5;
+  if(d.temperature>103)lr+=12;else if(d.temperature>101)lr+=7;
+  lr=Math.min(98,Math.max(5,lr));
+  let sr=10;
+  if(d.sleep_hours<5)sr+=40;else if(d.sleep_hours<6)sr+=28;else if(d.sleep_hours<7)sr+=14;
+  if(d.stress_level>7)sr+=18;else if(d.stress_level>5)sr+=8;
+  sr=Math.min(98,Math.max(5,sr));
+  let bio=d.age; if(bmi>30)bio+=4;else if(bmi>25)bio+=2;
+  if(d.smoker==='Yes')bio+=5; if(d.exercise_freq==='Daily')bio-=3;
+  const score=Math.max(5,Math.min(98,Math.round(100-(lr*.55+sr*.30+Math.abs(bio-d.age)*.5))));
+  const level=score>=70?'Low':score>=45?'Medium':'High';
+  const recs=[];
+  if(lr>50)recs.push({icon:'🏃',text:'Increase physical activity to at least 30 min/day'});
+  if(d.sleep_hours<7)recs.push({icon:'😴',text:'Aim for 7–9 hours of quality sleep'});
+  if(d.stress_level>6)recs.push({icon:'🧘',text:'Practice mindfulness or breathing exercises daily'});
+  if(bmi>25)recs.push({icon:'🥗',text:'Follow a balanced diet to reach healthy BMI'});
+  if(d.smoker==='Yes')recs.push({icon:'🚭',text:'Smoking significantly raises cardiovascular risk'});
+  if(d.heart_rate>100)recs.push({icon:'❤️',text:'Elevated resting heart rate — consult a cardiologist'});
+  if(d.temperature>101)recs.push({icon:'🌡️',text:'Fever detected — rest, hydrate, and see a doctor if persistent'});
+  if(recs.length===0)recs.push({icon:'✅',text:'Keep up the great work! Schedule regular checkups.'});
+  const docs=level==='High'?[
+    {name:'Dr. Priya Sharma',hospital:'Apollo Hospitals',specialization:'Cardiology',phone:'+918042124444',doctor_id:'D1'},
+    {name:'Dr. Rajesh Kumar',hospital:'Manipal Hospital',specialization:'General Medicine',phone:'+918022344444',doctor_id:'D2'},
+  ]:[];
+  return {score,risk_level:level,bmi:Math.round(bmi*10)/10,bio_age:Math.round(bio),lifestyle_risk:lr,sleep_risk:sr,recommendations:recs,matched_doctors:docs,sms_sent:false,vitals_summary:{heart_rate:d.heart_rate,systolic_bp:d.systolic_bp,diastolic_bp:d.diastolic_bp,temperature:d.temperature}};
+}
+
+// ══════════════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════════════
+function renderResults(mc){
+  if(!state.lastResult){
+    mc.innerHTML=`<div class="card" style="text-align:center;padding:60px 20px">
+      <div style="font-size:40px;margin-bottom:14px">🔬</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">${t('noResults')}</div>
+      <div style="color:var(--text2);font-size:12px;margin-bottom:20px">Complete a health analysis to see your results</div>
+      <button class="btn btn-primary" onclick="navigate('analyze')">${t('analyze')}</button>
+    </div>`;
+    return;
+  }
+  const r=state.lastResult;
+  const col=r.risk_level==='Low'?'var(--green)':r.risk_level==='Medium'?'var(--amber)':'var(--red)';
+  const arc=r.score*(2*Math.PI*44)/100;
+  const circum=2*Math.PI*44;
+
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">📈 ${t('results')}</div><div class="page-sub">AI-powered health analysis</div></div>
+  <button class="btn btn-ghost" onclick="navigate('analyze')">↩ Re-analyze</button>
+</div>
+
+${r.risk_level==='High'?`<div class="alert-banner alert-high anim">
+  <span style="font-size:20px">🚨</span>
+  <div><div style="font-weight:700">High Health Risk Detected</div>
+  <div style="font-size:11px;opacity:.8">${r.sms_sent?'SMS alert sent to your phone. ':''}Seek medical attention promptly.</div></div>
+</div>`:''}
+
+<div class="g2 anim" style="animation-delay:.05s">
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px">
+    <div class="risk-ring">
+      <svg viewBox="0 0 100 100" width="130" height="130">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="${col}" stroke-width="8"
+          stroke-dasharray="${arc} ${circum}" stroke-linecap="round"
+          style="transition:stroke-dasharray 1s ease"/>
+      </svg>
+      <div class="risk-ring-label">
+        <div class="risk-score-num" style="color:${col}">${r.score}</div>
+        <div class="risk-score-lbl">/100</div>
+      </div>
+    </div>
+    <div class="risk-badge risk-${r.risk_level.toLowerCase()}" style="margin-top:8px">
+      ${r.risk_level==='Low'?'✅':r.risk_level==='Medium'?'⚠️':'🔴'} ${t(r.risk_level.toLowerCase())}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:20px">
+      <div style="text-align:center;padding:11px;background:var(--bg2);border-radius:9px;border:1px solid var(--border)">
+        <div style="font-size:19px;font-weight:800;font-family:var(--mono)">${r.bmi}</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">BMI</div>
+      </div>
+      <div style="text-align:center;padding:11px;background:var(--bg2);border-radius:9px;border:1px solid var(--border)">
+        <div style="font-size:19px;font-weight:800;font-family:var(--mono)">${r.bio_age}</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">${t('bioAge')}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Vitals Summary</div>
+    ${Object.entries(r.vitals_summary||{}).map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:11.5px;color:var(--text2)">${k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</div>
+      <div style="font-weight:700;font-family:var(--mono)">${v}</div>
+    </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;padding:9px 0;margin-top:2px">
+      <div style="font-size:11.5px;color:var(--text2)">Lifestyle Risk Score</div>
+      <div style="font-weight:700;font-family:var(--mono);color:${r.lifestyle_risk>60?'var(--red)':r.lifestyle_risk>35?'var(--amber)':'var(--green)'}">${r.lifestyle_risk}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card anim" style="animation-delay:.1s">
+  <div class="card-title">💡 ${t('recommendations')}</div>
+  ${r.recommendations.map(rc=>`<div class="rec-item"><div class="rec-icon">${rc.icon}</div><div class="rec-text">${rc.text}</div></div>`).join('')}
+</div>
+
+${r.matched_doctors?.length?`
+<div class="card anim" style="animation-delay:.15s">
+  <div class="card-title">👨‍⚕️ ${t('matchedDoctors')}</div>
+  ${r.matched_doctors.map(d=>`
+  <div class="doc-card">
+    <div class="doc-avatar">👨‍⚕️</div>
+    <div class="doc-info">
+      <div class="doc-name">${d.name}</div>
+      <div class="doc-spec">${d.specialization}</div>
+      <div class="doc-hosp">🏥 ${d.hospital}</div>
+    </div>
+    <div class="doc-actions">
+      <a href="tel:${d.phone}" class="btn btn-ghost">${t('call')}</a>
+    </div>
+  </div>`).join('')}
+</div>`:''}`;
+}
+
+// ══════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════
+function renderHistory(mc){
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">🗂️ ${t('history')}</div><div class="page-sub">All your past analyses</div></div>
+  <button class="btn btn-primary" onclick="navigate('analyze')">+ New Analysis</button>
+</div>
+<div class="card anim" style="animation-delay:.05s">
+  ${state.analysisHistory.length===0
+    ?`<div style="text-align:center;padding:50px;color:var(--text3)"><div style="font-size:36px;margin-bottom:10px">📭</div>${t('noHistory')}</div>`
+    :state.analysisHistory.slice().reverse().map((h,i)=>`
+    <div class="hist-item" onclick="viewHistoryItem(${state.analysisHistory.length-1-i})">
+      <div class="hist-dot" style="background:${h.level==='Low'?'var(--green)':h.level==='Medium'?'var(--amber)':'var(--red)'}"></div>
+      <div class="hist-info">
+        <div class="hist-date">${new Date(h.ts).toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2)">${t(h.level?.toLowerCase()||'low')} · HR ${h.hr} BPM · BMI ${h.bmi}</div>
+      </div>
+      <div class="hist-score" style="color:${h.level==='Low'?'var(--green)':h.level==='Medium'?'var(--amber)':'var(--red)'}">${h.score}</div>
+      <div style="font-size:11px;color:var(--text3)">→</div>
+    </div>`).join('')
+  }
+</div>`;
+}
+
+function viewHistoryItem(idx){ state.lastResult=null; navigate('results'); }
+
+// ══════════════════════════════════════════════════
+// HOSPITALS
+// ══════════════════════════════════════════════════
+async function renderHospitals(mc){
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">🏥 ${t('nearbyHospitals')}</div><div class="page-sub">Bengaluru area hospitals</div></div>
+</div>
+<div class="card anim"><div id="hosp-list"><div style="text-align:center;padding:30px"><span class="spin"></span></div></div></div>`;
+
+  const data=await api('/hospitals?lat=12.9716&lon=77.5946');
+  const hosps=data?.hospitals||[
+    {name:'Victoria Hospital',distance_km:2.1,phone:'+918022867806',lat:12.9680,lon:77.5760},
+    {name:'NIMHANS',distance_km:3.4,phone:'+918046110007',lat:12.9407,lon:77.5960},
+    {name:'Manipal Hospital',distance_km:5.2,phone:'+918022344444',lat:12.9563,lon:77.6473},
+    {name:'Apollo Hospitals',distance_km:7.8,phone:'+918042124444',lat:12.9121,lon:77.6446},
+    {name:'Fortis Hospital',distance_km:8.1,phone:'+918066214444',lat:12.9010,lon:77.6038},
+  ];
+  document.getElementById('hosp-list').innerHTML=hosps.map((h,i)=>`
+  <div class="doc-card" style="margin-bottom:8px">
+    <div class="doc-avatar" style="background:var(--red-d)">🏥</div>
+    <div class="doc-info">
+      <div class="doc-name">${['🥇','🥈','🥉','④','⑤'][i]||'·'} ${h.name}</div>
+      <div class="doc-spec">${h.distance_km.toFixed(1)} km away</div>
+      <div class="doc-hosp">~${Math.round(h.distance_km*3.5)} min drive</div>
+    </div>
+    <div class="doc-actions">
+      <a href="tel:${h.phone}" class="btn btn-ghost" style="font-size:11px">📞 ${t('call')}</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}" target="_blank" class="btn btn-primary" style="font-size:11px">🗺 ${t('route')}</a>
+    </div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// DOCTOR DASHBOARD
+// ══════════════════════════════════════════════════
+function renderDoctorDashboard(mc){
+  const di=state.profile?.doctor_info||{};
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">👨‍⚕️ ${t('doctorDashboard')}</div><div class="page-sub">Welcome, ${state.full_name}</div></div>
+</div>
+
+<div class="g2 anim" style="animation-delay:.05s">
+  <div class="card">
+    <div class="card-title">👤 ${t('doctorProfile')}</div>
+    ${di.hospital?`<div class="registered-badge">✅ Registered Doctor</div><br/>`:''}
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:52px;height:52px;border-radius:14px;background:var(--green-d);
+        display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(16,217,138,.25)">👨‍⚕️</div>
+      <div>
+        <div style="font-size:16px;font-weight:800">${state.full_name}</div>
+        <div style="font-size:12px;color:var(--text2)">${di.specialization||'—'}</div>
+        <div style="font-size:11px;color:var(--text3)">🏥 ${di.hospital||'—'}</div>
+      </div>
+    </div>
+    ${di.experience_years?`<div style="padding:10px;background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--border);font-size:12px;color:var(--text2)">
+      <span style="color:var(--text3)">Experience:</span> ${di.experience_years} years
+    </div>`:
+    `<div style="padding:16px;background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--border);text-align:center;font-size:12px;color:var(--text3)">
+      Complete your profile →
+      <button class="btn btn-primary" style="margin-top:8px;width:100%" onclick="navigate('doc-register')">${t('registerDoctor')}</button>
+    </div>`}
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Quick Stats</div>
+    <div class="g2" style="gap:8px">
+      <div class="sv-pill" style="padding:14px;background:var(--bg2)"><div class="sv-val" style="font-size:22px">${state.registeredDoctors.length}</div><div class="sv-lbl">Registered Docs</div></div>
+      <div class="sv-pill" style="padding:14px;background:var(--bg2)"><div class="sv-val" style="font-size:22px">0</div><div class="sv-lbl">Active Alerts</div></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:var(--amber-d);border:1px solid rgba(247,183,49,.3);border-radius:var(--r-sm);font-size:12px;color:var(--amber)">
+      ⚠️ Connect Twilio to receive SMS patient alerts for high-risk cases
+    </div>
+  </div>
+</div>
+
+<div class="card anim" style="animation-delay:.1s">
+  <div class="card-title">📋 Patient Alerts (Demo)</div>
+  <div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">
+    <div style="font-size:28px;margin-bottom:10px">📭</div>
+    No alerts yet. High-risk patient analyses will appear here.
+  </div>
+</div>`;
+}
+
+function renderDoctorRegister(mc){
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">📝 ${t('registerDoctor')}</div><div class="page-sub">Add a doctor to the Health-Twin network</div></div>
+</div>
+
+<div class="doc-reg-form anim" style="max-width:560px;animation-delay:.05s">
+  <h3>Doctor Registration</h3>
+  <div class="form-field">
+    <label class="form-label">Full Name</label>
+    <input type="text" class="form-input" id="dr-name" placeholder="Dr. Full Name"/>
+  </div>
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-label">Hospital</label>
+      <input type="text" class="form-input" id="dr-hospital" placeholder="Hospital name"/>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Specialization</label>
+      <select class="form-select" id="dr-spec">
+        <option>Cardiology</option><option>Neurology</option><option>Pulmonology</option>
+        <option>General Medicine</option><option>Orthopedics</option><option>Dermatology</option>
+        <option>Psychiatry</option><option>Pediatrics</option><option>Gynecology</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-label">Phone</label>
+      <input type="tel" class="form-input" id="dr-phone" placeholder="+91..."/>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Experience (years)</label>
+      <input type="number" class="form-input" id="dr-exp" value="5" min="0" max="60"/>
+    </div>
+  </div>
+  <div class="form-field">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-input" id="dr-email" placeholder="doctor@hospital.com"/>
+  </div>
+  <button class="btn btn-primary btn-lg" onclick="submitDoctorReg()">Register Doctor</button>
+</div>`;
+}
+
+async function submitDoctorReg(){
+  const payload={
+    name:document.getElementById('dr-name').value,
+    hospital:document.getElementById('dr-hospital').value,
+    specialization:document.getElementById('dr-spec').value,
+    phone:document.getElementById('dr-phone').value,
+    experience_years:+document.getElementById('dr-exp').value,
+    email:document.getElementById('dr-email').value,
+  };
+  if(!payload.name||!payload.hospital){showToast('Please fill required fields');return;}
+  const res=await api('/doctors/register','POST',payload);
+  const doc=res?.doctor||{...payload,doctor_id:'D'+Date.now()};
+  state.registeredDoctors.push(doc);
+  showToast('✅ Doctor registered successfully!');
+  navigate('doc-list');
+}
+
+async function renderDoctorList(mc){
+  mc.innerHTML=`
+<div class="page-header anim">
+  <div><div class="page-title">👨‍⚕️ ${t('allDoctors')}</div><div class="page-sub">All registered Health-Twin doctors</div></div>
+  <button class="btn btn-primary" onclick="navigate('doc-register')">+ Register Doctor</button>
+</div>
+<div class="card anim" id="doclist-card"><div style="text-align:center;padding:20px"><span class="spin"></span></div></div>`;
+
+  const res=await api('/doctors');
+  const docs=[...(state.registeredDoctors||[]),...(res?.doctors||[])];
+  const unique=docs.filter((d,i,a)=>a.findIndex(x=>x.doctor_id===d.doctor_id)===i);
+
+  document.getElementById('doclist-card').innerHTML=`
+    <div class="card-title">${t('savedDoctors')} (${unique.length})</div>
+    ${unique.map(d=>`
+    <div class="doc-card">
+      <div class="doc-avatar">👨‍⚕️</div>
+      <div class="doc-info">
+        <div class="doc-name">${d.name}</div>
+        <div class="doc-spec">${d.specialization} · ${d.experience_years||'?'} yrs</div>
+        <div class="doc-hosp">🏥 ${d.hospital||'—'}</div>
+      </div>
+      <div class="doc-actions">
+        ${d.phone?`<a href="tel:${d.phone}" class="btn btn-ghost">${t('call')}</a>`:''}
+      </div>
+    </div>`).join('') || `<div style="text-align:center;padding:40px;color:var(--text3)">No doctors registered yet</div>`}`;
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, dur=2500){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  applyTranslations();
+  document.getElementById('login-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('auth-modal').style.display='none';
+});
+</script>
+</body>
+</html>
