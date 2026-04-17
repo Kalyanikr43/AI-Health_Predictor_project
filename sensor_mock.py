@@ -1,5 +1,5 @@
 """
-VitaCore — ESP32 Heart Rate Sensor Mock
+Health-Twin  — ESP32 Heart Rate Sensor Mock
 Simulates an ESP32 posting BPM values to the Flask backend.
 
 Run:  python sensor_mock.py --patient P12345678 --url http://localhost:5000
