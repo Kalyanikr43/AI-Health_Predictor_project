@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# 🏥 VitaCore — AI Health Monitoring System
+# 🏥 Health-Twin — AI Health Monitoring System
 
 A full-stack health monitoring application with AI risk analysis, live heart rate tracking, multi-language support, and doctor management.
 
@@ -159,5 +159,5 @@ pip install flask-sqlalchemy mysql-connector-python
 - 🔐 Auth with token-based sessions
 - 🎨 Modern dark UI with gradients, animations, cards
 =======
-# AI-Health_Prictor
->>>>>>> a087028cb89b3f5e34f21ed3587ae30b2b87cd1a
+
+#For Education purpose ONLY!!
